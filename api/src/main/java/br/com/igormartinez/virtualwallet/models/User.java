@@ -1,7 +1,14 @@
 package br.com.igormartinez.virtualwallet.models;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,7 +18,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,11 +36,58 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ManyToOne
+    @Column(name = "account_non_expired", nullable = false)
+    private Boolean accountNonExpired;
+
+    @Column(name = "account_non_locked", nullable = false)
+    private Boolean accountNonLocked;
+
+    @Column(name = "credentials_non_expired", nullable = false)
+    private Boolean credentialsNonExpired;
+
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role")
     private Role role;
 
     public User() {
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(role);
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return this.accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return this.accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return this.credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
     public Long getId() {
@@ -68,12 +122,40 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Boolean getAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    public void setAccountNonExpired(Boolean accountNonExpired) {
+        this.accountNonExpired = accountNonExpired;
+    }
+
+    public Boolean getAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    public void setAccountNonLocked(Boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
+    }
+
+    public Boolean getCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
+
+    public void setCredentialsNonExpired(Boolean credentialsNonExpired) {
+        this.credentialsNonExpired = credentialsNonExpired;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public Role getRole() {
@@ -93,6 +175,10 @@ public class User {
         result = prime * result + ((document == null) ? 0 : document.hashCode());
         result = prime * result + ((email == null) ? 0 : email.hashCode());
         result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((accountNonExpired == null) ? 0 : accountNonExpired.hashCode());
+        result = prime * result + ((accountNonLocked == null) ? 0 : accountNonLocked.hashCode());
+        result = prime * result + ((credentialsNonExpired == null) ? 0 : credentialsNonExpired.hashCode());
+        result = prime * result + ((enabled == null) ? 0 : enabled.hashCode());
         result = prime * result + ((role == null) ? 0 : role.hashCode());
         return result;
     }
@@ -130,6 +216,26 @@ public class User {
             if (other.password != null)
                 return false;
         } else if (!password.equals(other.password))
+            return false;
+        if (accountNonExpired == null) {
+            if (other.accountNonExpired != null)
+                return false;
+        } else if (!accountNonExpired.equals(other.accountNonExpired))
+            return false;
+        if (accountNonLocked == null) {
+            if (other.accountNonLocked != null)
+                return false;
+        } else if (!accountNonLocked.equals(other.accountNonLocked))
+            return false;
+        if (credentialsNonExpired == null) {
+            if (other.credentialsNonExpired != null)
+                return false;
+        } else if (!credentialsNonExpired.equals(other.credentialsNonExpired))
+            return false;
+        if (enabled == null) {
+            if (other.enabled != null)
+                return false;
+        } else if (!enabled.equals(other.enabled))
             return false;
         if (role == null) {
             if (other.role != null)

@@ -2,9 +2,12 @@ package br.com.igormartinez.virtualwallet.models;
 
 import java.util.List;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,7 +16,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "roles")
-public class Role {
+public class Role implements GrantedAuthority {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,10 +25,15 @@ public class Role {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "role")
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "role", fetch = FetchType.LAZY)
     private List<User> users;
 
     public Role() {
+    }
+
+    @Override
+    public String getAuthority() {
+        return this.description;
     }
 
     public Long getId() {
