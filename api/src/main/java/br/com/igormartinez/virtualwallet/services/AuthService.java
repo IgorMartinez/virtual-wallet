@@ -16,6 +16,7 @@ import br.com.igormartinez.virtualwallet.exceptions.InvalidTokenException;
 import br.com.igormartinez.virtualwallet.exceptions.InvalidUsernamePasswordException;
 import br.com.igormartinez.virtualwallet.exceptions.RequestValidationException;
 import br.com.igormartinez.virtualwallet.exceptions.ResourceAlreadyExistsException;
+import br.com.igormartinez.virtualwallet.exceptions.ResourceNotFoundException;
 import br.com.igormartinez.virtualwallet.exceptions.TokenCreationErrorException;
 import br.com.igormartinez.virtualwallet.models.Role;
 import br.com.igormartinez.virtualwallet.models.User;
@@ -57,7 +58,8 @@ public class AuthService {
         user.setCredentialsNonExpired(Boolean.TRUE);
         user.setEnabled(Boolean.TRUE);
 
-        Role role = roleRepository.findById(1L).orElseThrow(() -> new RuntimeException());
+        Role role = roleRepository.findById(1L)
+            .orElseThrow(() -> new ResourceNotFoundException("The role was not found with the given ID."));
         user.setRole(role);
 
         User createdUser = repository.save(user);
