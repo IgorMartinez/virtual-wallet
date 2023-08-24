@@ -15,6 +15,7 @@ import br.com.igormartinez.virtualwallet.data.security.Token;
 import br.com.igormartinez.virtualwallet.exceptions.InvalidTokenException;
 import br.com.igormartinez.virtualwallet.exceptions.InvalidUsernamePasswordException;
 import br.com.igormartinez.virtualwallet.exceptions.RequestValidationException;
+import br.com.igormartinez.virtualwallet.exceptions.ResourceAlreadyExistsException;
 import br.com.igormartinez.virtualwallet.exceptions.TokenCreationErrorException;
 import br.com.igormartinez.virtualwallet.models.Role;
 import br.com.igormartinez.virtualwallet.models.User;
@@ -41,13 +42,16 @@ public class AuthService {
         this.roleRepository = roleRepository;
     }
 
-    public UserDTO signup(RegistrationDTO registrationDTO) {
+    public UserDTO signup(RegistrationDTO registration) {
+
+        if (repository.findByEmailOrDocument(registration.email(), registration.document()).isPresent())
+            throw new ResourceAlreadyExistsException("The email or document is already in use.");
         
         User user = new User();
-        user.setName(registrationDTO.name());
-        user.setDocument(registrationDTO.document());
-        user.setEmail(registrationDTO.email());
-        user.setPassword(passwordManager.encodePassword(registrationDTO.password()));
+        user.setName(registration.name());
+        user.setDocument(registration.document());
+        user.setEmail(registration.email());
+        user.setPassword(passwordManager.encodePassword(registration.password()));
         user.setAccountNonExpired(Boolean.TRUE);
         user.setAccountNonLocked(Boolean.TRUE);
         user.setCredentialsNonExpired(Boolean.TRUE);
@@ -67,14 +71,8 @@ public class AuthService {
     }
     
     public Token signin(AccountCredentials accountCredentials) {
-        
-        if (accountCredentials == null 
-            || accountCredentials.getUsername() == null || accountCredentials.getUsername().isBlank()
-            || accountCredentials.getPassword() == null || accountCredentials.getPassword().isBlank())
-            throw new RequestValidationException("The email and password must be not blank.");
-        
-        String username = accountCredentials.getUsername();
-        String password = accountCredentials.getPassword();
+        String username = accountCredentials.username();
+        String password = accountCredentials.password();
         
         User user = repository.findByEmail(username)
             .orElseThrow(() -> new InvalidUsernamePasswordException());
