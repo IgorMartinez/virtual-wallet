@@ -12,4 +12,6 @@ import br.com.igormartinez.virtualwallet.models.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     
     Optional<User> findByEmail(@Param("email") String email);
+
+    Optional<User> findByEmailOrDocument(@Param("email") String email, @Param("document") String document);
 }
