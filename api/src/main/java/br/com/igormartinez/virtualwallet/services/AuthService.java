@@ -96,7 +96,7 @@ public class AuthService {
         try {
             return tokenProvider.refreshToken(refreshToken);
         } catch (JWTVerificationException ex){
-            throw new InvalidTokenException("Invalid refresh token");
+            throw new InvalidTokenException("Invalid refresh token.");
         } catch (JWTCreationException ex){
             throw new TokenCreationErrorException();
         }
