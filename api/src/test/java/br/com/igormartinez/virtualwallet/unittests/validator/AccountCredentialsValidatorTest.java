@@ -40,7 +40,7 @@ public class AccountCredentialsValidatorTest {
         
         Set<ConstraintViolation<AccountCredentials>> violations = validator.validate(accountCredentials);
         assertEquals(1, violations.size());
-        assertEquals("The username must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The username must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class AccountCredentialsValidatorTest {
         
         Set<ConstraintViolation<AccountCredentials>> violations = validator.validate(accountCredentials);
         assertEquals(1, violations.size());
-        assertEquals("The username must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The username must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -60,7 +60,7 @@ public class AccountCredentialsValidatorTest {
         
         Set<ConstraintViolation<AccountCredentials>> violations = validator.validate(accountCredentials);
         assertEquals(1, violations.size());
-        assertEquals("The password must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The password must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -70,6 +70,6 @@ public class AccountCredentialsValidatorTest {
         
         Set<ConstraintViolation<AccountCredentials>> violations = validator.validate(accountCredentials);
         assertEquals(1, violations.size());
-        assertEquals("The password must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The password must be not blank.", violations.iterator().next().getMessage());
     }
 }

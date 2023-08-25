@@ -40,7 +40,7 @@ public class RegistrationDTOValidatorTest {
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
-        assertEquals("The name must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The name must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class RegistrationDTOValidatorTest {
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
-        assertEquals("The name must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The name must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -60,7 +60,7 @@ public class RegistrationDTOValidatorTest {
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
-        assertEquals("The document must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The document must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class RegistrationDTOValidatorTest {
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
-        assertEquals("The document must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The document must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class RegistrationDTOValidatorTest {
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
-        assertEquals("The email must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The email must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class RegistrationDTOValidatorTest {
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
-        assertEquals("The email must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The email must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class RegistrationDTOValidatorTest {
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
-        assertEquals("The password must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The password must be not blank.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -110,6 +110,6 @@ public class RegistrationDTOValidatorTest {
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
-        assertEquals("The password must be not blank", violations.iterator().next().getMessage());
+        assertEquals("The password must be not blank.", violations.iterator().next().getMessage());
     }
 }
