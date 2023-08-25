@@ -22,7 +22,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import br.com.igormartinez.virtualwallet.exceptions.InvalidTokenException;
 import br.com.igormartinez.virtualwallet.exceptions.RequestValidationException;
 import br.com.igormartinez.virtualwallet.exceptions.ResourceAlreadyExistsException;
+import br.com.igormartinez.virtualwallet.exceptions.ResourceNotFoundException;
 import br.com.igormartinez.virtualwallet.exceptions.TokenCreationErrorException;
+import br.com.igormartinez.virtualwallet.exceptions.UserUnauthorizedException;
 import br.com.igormartinez.virtualwallet.exceptions.InvalidUsernamePasswordException;
 
 @ControllerAdvice
@@ -81,7 +83,8 @@ public class CustomizedExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({
         InvalidUsernamePasswordException.class,
-        InvalidTokenException.class})
+        InvalidTokenException.class,
+        UserUnauthorizedException.class})
     public final ResponseEntity<?> handleUnauthorizedExceptions(Exception ex, WebRequest request) {
         ProblemDetail problemDetail = super.createProblemDetail(
                 ex, 
@@ -93,6 +96,20 @@ public class CustomizedExceptionHandler extends ResponseEntityExceptionHandler {
         
         HttpHeaders headers = new HttpHeaders();
         return super.createResponseEntity(problemDetail, headers, HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public final ResponseEntity<?> handleNotFoundExceptions(Exception ex, WebRequest request) {
+        ProblemDetail problemDetail = super.createProblemDetail(
+                ex, 
+                HttpStatus.NOT_FOUND, 
+                ex.getMessage(), 
+                null, 
+                null, 
+                request);
+        
+        HttpHeaders headers = new HttpHeaders();
+        return super.createResponseEntity(problemDetail, headers, HttpStatus.NOT_FOUND, request);
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
