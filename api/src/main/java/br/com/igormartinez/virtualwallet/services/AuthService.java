@@ -1,5 +1,7 @@
 package br.com.igormartinez.virtualwallet.services;
 
+import java.math.BigDecimal;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,6 +55,7 @@ public class AuthService {
         user.setDocument(registration.document());
         user.setEmail(registration.email());
         user.setPassword(passwordManager.encodePassword(registration.password()));
+        user.setAccountBalance(new BigDecimal("0.00"));
         user.setAccountNonExpired(Boolean.TRUE);
         user.setAccountNonLocked(Boolean.TRUE);
         user.setCredentialsNonExpired(Boolean.TRUE);
@@ -69,6 +72,7 @@ public class AuthService {
             createdUser.getName(), 
             createdUser.getDocument(), 
             createdUser.getEmail(), 
+            createdUser.getAccountBalance(),
             createdUser.getRole().getDescription());
     }
     

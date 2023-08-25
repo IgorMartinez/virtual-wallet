@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN account_balance MONEY DEFAULT 0.00;

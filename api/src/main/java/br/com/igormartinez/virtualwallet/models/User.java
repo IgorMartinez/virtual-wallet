@@ -1,5 +1,6 @@
 package br.com.igormartinez.virtualwallet.models;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
@@ -35,6 +36,9 @@ public class User implements UserDetails {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name = "account_balance")
+    private BigDecimal accountBalance;
 
     @Column(name = "account_non_expired", nullable = false)
     private Boolean accountNonExpired;
@@ -126,6 +130,14 @@ public class User implements UserDetails {
         this.password = password;
     }
 
+    public BigDecimal getAccountBalance() {
+        return accountBalance;
+    }
+
+    public void setAccountBalance(BigDecimal accountBalance) {
+        this.accountBalance = accountBalance;
+    }
+
     public Boolean getAccountNonExpired() {
         return accountNonExpired;
     }
@@ -175,6 +187,7 @@ public class User implements UserDetails {
         result = prime * result + ((document == null) ? 0 : document.hashCode());
         result = prime * result + ((email == null) ? 0 : email.hashCode());
         result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((accountBalance == null) ? 0 : accountBalance.hashCode());
         result = prime * result + ((accountNonExpired == null) ? 0 : accountNonExpired.hashCode());
         result = prime * result + ((accountNonLocked == null) ? 0 : accountNonLocked.hashCode());
         result = prime * result + ((credentialsNonExpired == null) ? 0 : credentialsNonExpired.hashCode());
@@ -216,6 +229,11 @@ public class User implements UserDetails {
             if (other.password != null)
                 return false;
         } else if (!password.equals(other.password))
+            return false;
+        if (accountBalance == null) {
+            if (other.accountBalance != null)
+                return false;
+        } else if (!accountBalance.equals(other.accountBalance))
             return false;
         if (accountNonExpired == null) {
             if (other.accountNonExpired != null)
