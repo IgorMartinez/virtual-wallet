@@ -50,6 +50,7 @@ public class SecurityConfig {
                 authorizeHttpRequests -> authorizeHttpRequests
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .requestMatchers("/auth/signup", "/auth/signin", "/auth/refresh").permitAll()
+                    .requestMatchers("/api/v1/**").authenticated()
                     .anyRequest().denyAll()
             )
             .exceptionHandling(exceptionHandler -> exceptionHandler
