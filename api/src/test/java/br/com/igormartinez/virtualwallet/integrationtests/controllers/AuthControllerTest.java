@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -57,6 +59,7 @@ public class AuthControllerTest extends AbstractIntegrationTest {
         assertEquals(USER_NAME, output.name());
         assertEquals(USER_DOCUMENT, output.document());
         assertEquals(USER_EMAIL, output.email());
+        assertEquals(new BigDecimal("0.00"), output.accountBalance());
         assertEquals(USER_ROLE, output.role());
     }
 
