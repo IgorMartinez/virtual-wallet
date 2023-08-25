@@ -1,5 +1,7 @@
 package br.com.igormartinez.virtualwallet.mocks;
 
+import java.math.BigDecimal;
+
 import br.com.igormartinez.virtualwallet.data.dto.RegistrationDTO;
 import br.com.igormartinez.virtualwallet.models.Role;
 import br.com.igormartinez.virtualwallet.models.User;
@@ -13,6 +15,7 @@ public class UserMock {
         user.setDocument("000.000.000-"+String.format("%02d", number%100));
         user.setEmail("user_mail" + number + "@test.com");
         user.setPassword("password" + number);
+        user.setAccountBalance(new BigDecimal(number + ".99"));
         user.setAccountNonExpired((number%2==0) ? Boolean.FALSE : Boolean.TRUE);
         user.setAccountNonLocked((number%2==0) ? Boolean.FALSE : Boolean.TRUE);
         user.setCredentialsNonExpired((number%2==0) ? Boolean.FALSE : Boolean.TRUE);
@@ -33,6 +36,7 @@ public class UserMock {
         user.setDocument(registrationDTO.document());
         user.setEmail(registrationDTO.email());
         user.setPassword(registrationDTO.password());
+        user.setAccountBalance(new BigDecimal(number + ".99"));
         user.setAccountNonExpired((number%2==0) ? Boolean.FALSE : Boolean.TRUE);
         user.setAccountNonLocked((number%2==0) ? Boolean.FALSE : Boolean.TRUE);
         user.setCredentialsNonExpired((number%2==0) ? Boolean.FALSE : Boolean.TRUE);

@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -120,6 +121,7 @@ public class AuthServiceTest {
         assertEquals("Name 1", output.name());
         assertEquals("000.000.000-00", output.document());
         assertEquals("email@email.com", output.email());
+        assertEquals(new BigDecimal("1.99"), output.accountBalance());
         assertEquals("Description 1", output.role());
 
         // Verify the argument just before send to save in database
@@ -131,6 +133,7 @@ public class AuthServiceTest {
         assertEquals("000.000.000-00", capturedObject.getDocument());
         assertEquals("email@email.com", capturedObject.getEmail());
         assertEquals("encodedPassword", capturedObject.getPassword());
+        assertEquals(new BigDecimal("0.00"), capturedObject.getAccountBalance());
         assertTrue(capturedObject.getAccountNonExpired());
         assertTrue(capturedObject.getAccountNonLocked());
         assertTrue(capturedObject.getCredentialsNonExpired());
