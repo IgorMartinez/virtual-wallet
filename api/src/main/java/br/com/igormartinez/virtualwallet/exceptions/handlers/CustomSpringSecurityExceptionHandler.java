@@ -25,7 +25,7 @@ public class CustomSpringSecurityExceptionHandler implements AuthenticationEntry
                 "about:blank",
                 "Forbidden", 
                 HttpStatus.FORBIDDEN.value(), 
-                authException.getMessage(), // Authentication required
+                "Authentication required.",
                 request.getRequestURI());
         response.getWriter().write(exceptionResponse.toJsonString());
         response.setStatus(HttpStatus.FORBIDDEN.value());
@@ -39,7 +39,7 @@ public class CustomSpringSecurityExceptionHandler implements AuthenticationEntry
                 "about:blank",
                 "Forbidden", 
                 HttpStatus.FORBIDDEN.value(), 
-                exc.getMessage(), // Access denied
+                "Access denied.",
                 request.getRequestURI());
         response.getWriter().write(exceptionResponse.toJsonString());
         response.setStatus(HttpStatus.FORBIDDEN.value());
