@@ -13,6 +13,9 @@ import br.com.igormartinez.virtualwallet.data.dto.UserDTO;
 import br.com.igormartinez.virtualwallet.data.security.AccountCredentials;
 import br.com.igormartinez.virtualwallet.data.security.Token;
 import br.com.igormartinez.virtualwallet.services.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -22,16 +25,41 @@ public class AuthController {
     @Autowired
     AuthService service;
 
+    @Operation(
+        summary = "Signup a user",
+        responses = {
+            @ApiResponse(description = "Success", responseCode = "200", content = @Content),
+            @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+            @ApiResponse(description = "Conflict", responseCode = "409", content = @Content),
+            @ApiResponse(description = "Internal Server Error", responseCode = "500", content = @Content)
+        }
+    )
     @PostMapping("/signup")
     public UserDTO signup(@RequestBody @Valid RegistrationDTO registrationDTO) {
         return service.signup(registrationDTO);
     }
 
+    @Operation(
+        summary = "Authenticates a user and return a token",
+        responses = {
+            @ApiResponse(description = "Success", responseCode = "200", content = @Content),
+            @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+            @ApiResponse(description = "Internal Server Error", responseCode = "500", content = @Content)
+        }
+    )
     @PostMapping("/signin")
     public Token signin(@RequestBody @Valid AccountCredentials accountCredentials) {
         return service.signin(accountCredentials);
     }
     
+    @Operation(
+        summary = "Refresh token for authenticated user and returns a token",
+        responses = {
+            @ApiResponse(description = "Success", responseCode = "200", content = @Content),
+            @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+            @ApiResponse(description = "Internal Server Error", responseCode = "500", content = @Content)
+        }
+    )
     @PutMapping("/refresh")
     public Token refresh(@RequestHeader("Authorization") String refreshToken) {
         return service.refresh(refreshToken);
