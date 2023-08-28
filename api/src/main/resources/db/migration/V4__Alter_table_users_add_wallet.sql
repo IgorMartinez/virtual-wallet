@@ -1,2 +1,2 @@
 ALTER TABLE users
-ADD COLUMN account_balance MONEY DEFAULT 0.00;
+ADD COLUMN account_balance NUMERIC(10,2) DEFAULT 0.00;
