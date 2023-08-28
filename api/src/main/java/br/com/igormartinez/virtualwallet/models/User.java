@@ -53,7 +53,7 @@ public class User implements UserDetails {
     private Boolean enabled;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role")
+    @JoinColumn(name = "role_id")
     private Role role;
 
     public User() {
