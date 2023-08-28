@@ -1,4 +1,4 @@
-package br.com.igormartinez.virtualwallet.services;
+package br.com.igormartinez.virtualwallet.security;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;

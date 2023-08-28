@@ -11,6 +11,7 @@ import br.com.igormartinez.virtualwallet.exceptions.ResourceNotFoundException;
 import br.com.igormartinez.virtualwallet.exceptions.UserUnauthorizedException;
 import br.com.igormartinez.virtualwallet.models.User;
 import br.com.igormartinez.virtualwallet.repositories.UserRepository;
+import br.com.igormartinez.virtualwallet.security.SecurityContextManager;
 
 @Service
 public class UserService implements UserDetailsService {

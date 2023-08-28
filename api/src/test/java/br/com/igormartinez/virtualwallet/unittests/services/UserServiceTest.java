@@ -24,7 +24,7 @@ import br.com.igormartinez.virtualwallet.exceptions.UserUnauthorizedException;
 import br.com.igormartinez.virtualwallet.mocks.UserMock;
 import br.com.igormartinez.virtualwallet.models.User;
 import br.com.igormartinez.virtualwallet.repositories.UserRepository;
-import br.com.igormartinez.virtualwallet.services.SecurityContextManager;
+import br.com.igormartinez.virtualwallet.security.SecurityContextManager;
 import br.com.igormartinez.virtualwallet.services.UserService;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
