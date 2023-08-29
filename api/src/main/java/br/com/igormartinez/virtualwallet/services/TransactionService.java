@@ -32,6 +32,36 @@ public class TransactionService {
         this.securityContextManager = securityContextManager;
     }
 
+    public TransactionDTO findById(Long id) {
+        if (id == null || id <= 0)
+            throw new RequestValidationException("The transaction-id must be a positive integer value.");
+
+        Transaction transaction = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("The transaction was not found with the given ID."));
+
+        if (!securityContextManager.checkSameUser(transaction.getUser().getId()))
+            throw new UserUnauthorizedException();
+
+        return new TransactionDTO(
+            transaction.getId(), 
+            transaction.getType().name(), 
+            transaction.getValue(), 
+            transaction.getDatetime());
+    }
+
+    public List<TransactionDTO> findAllByUser(Long userId) {
+        if (userId == null || userId <= 0)
+            throw new RequestValidationException("The user-id must be a positive integer value.");
+
+        if (!securityContextManager.checkSameUser(userId))
+            throw new UserUnauthorizedException();
+
+        return repository.findAllByUserId(userId)
+            .stream()
+            .map(t -> new TransactionDTO(t.getId(), t.getType().name(), t.getValue(), t.getDatetime()))
+            .toList();
+    }
+
     @Transactional
     public TransactionDTO createPersonalTransaction(PersonalTransactionDTO transactionDTO, TransactionType type) {
         if (!securityContextManager.checkSameUser(transactionDTO.user()))
