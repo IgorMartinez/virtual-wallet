@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -25,6 +26,7 @@ import br.com.igormartinez.virtualwallet.data.dto.TransferTransactionDTO;
 import br.com.igormartinez.virtualwallet.data.dto.UserDTO;
 import br.com.igormartinez.virtualwallet.data.security.AccountCredentials;
 import br.com.igormartinez.virtualwallet.data.security.Token;
+import br.com.igormartinez.virtualwallet.enums.TransactionType;
 import br.com.igormartinez.virtualwallet.integrationtests.testcontainers.AbstractIntegrationTest;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
@@ -34,6 +36,10 @@ import io.restassured.specification.RequestSpecification;
 public class TransactionControllerTest extends AbstractIntegrationTest {
 
     private static RequestSpecification specification;
+
+    private static Long TRANSACTION_DEPOSIT_ID; // testDepositWithSameUser()
+    private static Long TRANSACTION_WITHDRAWAL_ID; // testWithdrawalWithSameUserAndSuficientBalance()
+    private static Long TRANSACTION_TRANSFER_ID; // testTransferWithSameUserAndSuficientBalance()
     
     private static Long USER_ID; // signupAndAuthentication()
     private static String USER_ACCESS_TOKEN; // signupAndAuthentication()
@@ -47,6 +53,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     private static String TRANSFER_USER_DOCUMENT = "202.308.290-15";
     private static String TRANSFER_USER_EMAIL = "transactioncontroller2@integration.test";
 	private static String TRANSFER_USER_PASSWORD = "securedpassword";
+    private static String TRANSFER_USER_ACCESS_TOKEN; // signupTransferUserAndGetAccessToken()
     
     @Test
     @Order(0)
@@ -121,6 +128,56 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Order(0)
+    void testFindByIdAsUnauthenticated() {
+        ApiErrorResponse output = 
+            given()
+				.basePath("/api/v1/transaction")
+					.port(TestConfigs.SERVER_PORT)
+					.contentType(TestConfigs.CONTENT_TYPE_JSON)
+                    .pathParam("transaction-id", 1)
+				.when()
+				    .post("/{transaction-id}")
+				.then()
+					.statusCode(HttpStatus.FORBIDDEN.value())
+						.extract()
+							.body()
+                                .as(ApiErrorResponse.class);
+        
+        assertEquals("about:blank", output.type());
+        assertEquals("Forbidden", output.title());
+        assertEquals(HttpStatus.FORBIDDEN.value(), output.status());
+        assertEquals("Authentication required.", output.detail());
+        assertEquals("/api/v1/transaction/1", output.instance());
+        assertNull(output.errors());
+    }
+
+    @Test
+    @Order(0)
+    void testFindAllByUserAsUnauthenticated() {
+        ApiErrorResponse output = 
+            given()
+				.basePath("/api/v1/transaction")
+					.port(TestConfigs.SERVER_PORT)
+					.contentType(TestConfigs.CONTENT_TYPE_JSON)
+                    .pathParam("user-id", 1)
+				.when()
+				    .post("/user/{user-id}")
+				.then()
+					.statusCode(HttpStatus.FORBIDDEN.value())
+						.extract()
+							.body()
+                                .as(ApiErrorResponse.class);
+        
+        assertEquals("about:blank", output.type());
+        assertEquals("Forbidden", output.title());
+        assertEquals(HttpStatus.FORBIDDEN.value(), output.status());
+        assertEquals("Authentication required.", output.detail());
+        assertEquals("/api/v1/transaction/user/1", output.instance());
+        assertNull(output.errors());
+    }
+
+    @Test
     @Order(99)
     void signupAndAuthentication() {
         RegistrationDTO registrationDTO = 
@@ -164,6 +221,45 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
 			.setPort(TestConfigs.SERVER_PORT)
 			.setContentType(TestConfigs.CONTENT_TYPE_JSON)
 			.build();
+    }
+
+    @Test
+    @Order(99)
+    void signupTransferUserAndGetAccessToken() {
+        RegistrationDTO registrationDTO = 
+            new RegistrationDTO(TRANSFER_USER_NAME, TRANSFER_USER_DOCUMENT, 
+                TRANSFER_USER_EMAIL, TRANSFER_USER_PASSWORD);
+
+        TRANSFER_USER_ID = 
+            given()
+                .basePath("/auth/signup")
+                    .port(TestConfigs.SERVER_PORT)
+                    .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                    .body(registrationDTO)
+                .when()
+                    .post()
+                .then()
+                    .statusCode(HttpStatus.OK.value())
+                        .extract()
+                            .body()
+                                .as(UserDTO.class)
+                                    .id();
+
+        AccountCredentials accountCredentials = new AccountCredentials(TRANSFER_USER_EMAIL, TRANSFER_USER_PASSWORD);
+        TRANSFER_USER_ACCESS_TOKEN = 
+			given()
+				.basePath("/auth/signin")
+					.port(TestConfigs.SERVER_PORT)
+					.contentType(TestConfigs.CONTENT_TYPE_JSON)
+				.body(accountCredentials)
+					.when()
+				.post()
+					.then()
+						.statusCode(HttpStatus.OK.value())
+							.extract()
+							.body()
+								.as(Token.class)
+								    .getAccessToken();
     }
 
     @Test
@@ -264,6 +360,8 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
         assertEquals("DEPOSIT", output.type());
         assertEquals(new BigDecimal("1234.56"), output.value());
         assertNotNull(output.datetime());
+
+        TRANSACTION_DEPOSIT_ID = output.id();
 
         // Check if the balance as updated
         UserDTO userOutput = 
@@ -408,6 +506,8 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
         assertEquals(new BigDecimal("234.56"), output.value());
         assertNotNull(output.datetime());
 
+        TRANSACTION_WITHDRAWAL_ID = output.id();
+
         // Check if the balance as updated
         UserDTO userOutput = 
             given()
@@ -428,29 +528,6 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
 
     @Test
     @Order(300)
-    void signupTransferUser() {
-        RegistrationDTO registrationDTO = 
-            new RegistrationDTO(TRANSFER_USER_NAME, TRANSFER_USER_DOCUMENT, 
-                TRANSFER_USER_EMAIL, TRANSFER_USER_PASSWORD);
-
-        TRANSFER_USER_ID = 
-            given()
-                .basePath("/auth/signup")
-                    .port(TestConfigs.SERVER_PORT)
-                    .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                    .body(registrationDTO)
-                .when()
-                    .post()
-                .then()
-                    .statusCode(HttpStatus.OK.value())
-                        .extract()
-                            .body()
-                                .as(UserDTO.class)
-                                    .id();
-    }
-
-    @Test
-    @Order(310)
     void testTransferWithoutBody() {
         ApiErrorResponse output = 
             given()
@@ -472,7 +549,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(310)
+    @Order(300)
     void testTransferWithFieldsInvalid() {
         TransferTransactionDTO transferTransactionDTO 
             = new TransferTransactionDTO(null, -10L, new BigDecimal("120.555"));
@@ -501,7 +578,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(310)
+    @Order(300)
     void testTransferWithOtherUser() {
         TransferTransactionDTO transferTransactionDTO 
             = new TransferTransactionDTO(USER_ID+10, TRANSFER_USER_ID, new BigDecimal("98.99"));
@@ -527,7 +604,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(310)
+    @Order(300)
     void testTransferWithSameUserAndInsuficientBalance() {
         TransferTransactionDTO transferTransactionDTO 
             = new TransferTransactionDTO(USER_ID, TRANSFER_USER_ID, new BigDecimal("2000.00"));
@@ -553,7 +630,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(310)
+    @Order(300)
     void testTransferWithSameUserAndSuficientBalance() {
         TransferTransactionDTO transferTransactionDTO 
             = new TransferTransactionDTO(USER_ID, TRANSFER_USER_ID, new BigDecimal("98.99"));
@@ -575,6 +652,8 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
         assertEquals(new BigDecimal("98.99"), output.value());
         assertNotNull(output.datetime());
 
+        TRANSACTION_TRANSFER_ID = output.id();
+
         // Check if the balance of user as updated
         UserDTO userOutput = 
             given()
@@ -592,26 +671,11 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
                         .as(UserDTO.class);
         assertEquals(new BigDecimal("901.01"), userOutput.accountBalance());
 
-        // Login and check if the destiny have the balance updated
-        AccountCredentials accountCredentials = new AccountCredentials(TRANSFER_USER_EMAIL, TRANSFER_USER_PASSWORD);
-        String transferUserAccessToken = 
-			given()
-				.basePath("/auth/signin")
-					.port(TestConfigs.SERVER_PORT)
-					.contentType(TestConfigs.CONTENT_TYPE_JSON)
-				.body(accountCredentials)
-					.when()
-				.post()
-					.then()
-						.statusCode(HttpStatus.OK.value())
-							.extract()
-							.body()
-								.as(Token.class)
-								    .getAccessToken();
+        // Check if the destiny have the balance updated
         UserDTO userTargetOutput = 
             given()
 				.basePath("/api/v1/user")
-			        .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + transferUserAccessToken)
+			        .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + TRANSFER_USER_ACCESS_TOKEN)
 					.port(TestConfigs.SERVER_PORT)
 					.contentType(TestConfigs.CONTENT_TYPE_JSON)
                     .pathParam("user-id", TRANSFER_USER_ID)
@@ -626,7 +690,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(310)
+    @Order(300)
     void testTransferWithSameUserAndNotFoundPayee() {
         TransferTransactionDTO transferTransactionDTO 
             = new TransferTransactionDTO(USER_ID, TRANSFER_USER_ID+10000, new BigDecimal("98.99"));
@@ -649,5 +713,208 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
         assertEquals("The payee was not found with the given ID.", output.detail());
         assertEquals("/api/v1/transaction/transfer", output.instance());
         assertNull(output.errors());
+    }
+
+    @Test
+    @Order(400)
+    void testFindByIdWithParamInvalid() {
+        ApiErrorResponse output = 
+            given()
+				.spec(specification)
+                    .pathParam("transaction-id", 0)
+				.when()
+				    .get("/{transaction-id}")
+				.then()
+					.statusCode(HttpStatus.BAD_REQUEST.value())
+						.extract()
+							.body()
+                                .as(ApiErrorResponse.class);
+
+        assertEquals("about:blank", output.type());
+        assertEquals("Bad Request", output.title());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), output.status());
+        assertEquals("The transaction-id must be a positive integer value.", output.detail());
+        assertEquals("/api/v1/transaction/0", output.instance());
+        assertNull(output.errors());
+    }
+
+    @Test
+    @Order(400)
+    void testFindByIdWithTransactionNotFound() {
+        ApiErrorResponse output = 
+            given()
+				.spec(specification)
+                    .pathParam("transaction-id", 100000)
+				.when()
+				    .get("/{transaction-id}")
+				.then()
+					.statusCode(HttpStatus.NOT_FOUND.value())
+						.extract()
+							.body()
+                                .as(ApiErrorResponse.class);
+
+        assertEquals("about:blank", output.type());
+        assertEquals("Not Found", output.title());
+        assertEquals(HttpStatus.NOT_FOUND.value(), output.status());
+        assertEquals("The transaction was not found with the given ID.", output.detail());
+        assertEquals("/api/v1/transaction/100000", output.instance());
+        assertNull(output.errors());
+    }
+
+    @Test
+    @Order(400)
+    void testFindByIdWithOtherUser() {
+        // To test this case is necessary use other account
+        ApiErrorResponse output = 
+            given()
+				.basePath("/api/v1/transaction")
+			        .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + TRANSFER_USER_ACCESS_TOKEN)
+					.port(TestConfigs.SERVER_PORT)
+					.contentType(TestConfigs.CONTENT_TYPE_JSON)
+                    .pathParam("transaction-id", TRANSACTION_DEPOSIT_ID)
+				.when()
+				    .get("/{transaction-id}")
+				.then()
+					.statusCode(HttpStatus.UNAUTHORIZED.value())
+						.extract()
+							.body()
+                                .as(ApiErrorResponse.class);
+
+        assertEquals("about:blank", output.type());
+        assertEquals("Unauthorized", output.title());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), output.status());
+        assertEquals("The user is not authorized to access this resource.", output.detail());
+        assertEquals("/api/v1/transaction/"+TRANSACTION_DEPOSIT_ID, output.instance());
+        assertNull(output.errors());
+    }
+    
+    @Test
+    @Order(400)
+    void testFindByIdWithSameUser() {
+        TransactionDTO output = 
+            given()
+				.spec(specification)
+                    .pathParam("transaction-id", TRANSACTION_DEPOSIT_ID)
+				.when()
+				    .get("/{transaction-id}")
+				.then()
+					.statusCode(HttpStatus.OK.value())
+						.extract()
+							.body()
+                                .as(TransactionDTO.class);
+
+        assertEquals(output.id(), TRANSACTION_DEPOSIT_ID);
+        assertEquals("DEPOSIT", output.type());
+        assertEquals(new BigDecimal("1234.56"), output.value());
+        assertNotNull(output.datetime());
+    }
+
+    @Test
+    @Order(500)
+    void testFindAllByWithParamInvalid() {
+        ApiErrorResponse output = 
+            given()
+				.spec(specification)
+                    .pathParam("user-id", 0)
+				.when()
+				    .get("/user/{user-id}")
+				.then()
+					.statusCode(HttpStatus.BAD_REQUEST.value())
+						.extract()
+							.body()
+                                .as(ApiErrorResponse.class);
+
+        assertEquals("about:blank", output.type());
+        assertEquals("Bad Request", output.title());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), output.status());
+        assertEquals("The user-id must be a positive integer value.", output.detail());
+        assertEquals("/api/v1/transaction/user/0", output.instance());
+        assertNull(output.errors());
+    }
+
+    @Test
+    @Order(500)
+    void testFindAllByUserWithOtherUser() {
+        // To test this case is necessary use other account
+        ApiErrorResponse output = 
+            given()
+				.basePath("/api/v1/transaction")
+			        .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + TRANSFER_USER_ACCESS_TOKEN)
+					.port(TestConfigs.SERVER_PORT)
+					.contentType(TestConfigs.CONTENT_TYPE_JSON)
+                    .pathParam("user-id", USER_ID)
+				.when()
+				    .get("/user/{user-id}")
+				.then()
+					.statusCode(HttpStatus.UNAUTHORIZED.value())
+						.extract()
+							.body()
+                                .as(ApiErrorResponse.class);
+
+        assertEquals("about:blank", output.type());
+        assertEquals("Unauthorized", output.title());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), output.status());
+        assertEquals("The user is not authorized to access this resource.", output.detail());
+        assertEquals("/api/v1/transaction/user/"+USER_ID, output.instance());
+        assertNull(output.errors());
+    }
+
+    @Test
+    @Order(500)
+    void testFindAllByUserWithSameUserAndListNotEmpty() {
+        List<TransactionDTO> output = 
+            given()
+				.spec(specification)
+                    .pathParam("user-id", USER_ID)
+				.when()
+				    .get("/user/{user-id}")
+				.then()
+					.statusCode(HttpStatus.OK.value())
+						.extract()
+							.body()
+                                .jsonPath()
+                                    .getList(".", TransactionDTO.class);
+
+        assertEquals(3, output.size());
+
+        TransactionDTO outputPosition0 = output.get(0);
+        assertEquals(TRANSACTION_DEPOSIT_ID, outputPosition0.id());
+        assertEquals(TransactionType.DEPOSIT.name(), outputPosition0.type());
+        assertEquals(new BigDecimal("1234.56"), outputPosition0.value());
+        assertNotNull(outputPosition0.datetime());
+
+        TransactionDTO outputPosition1 = output.get(1);
+        assertEquals(TRANSACTION_WITHDRAWAL_ID, outputPosition1.id());
+        assertEquals(TransactionType.WITHDRAWAL.name(), outputPosition1.type());
+        assertEquals(new BigDecimal("234.56"), outputPosition1.value());
+        assertNotNull(outputPosition1.datetime());
+
+        TransactionDTO outputPosition2 = output.get(2);
+        assertEquals(TRANSACTION_TRANSFER_ID, outputPosition2.id());
+        assertEquals(TransactionType.TRANSFER.name(), outputPosition2.type());
+        assertEquals(new BigDecimal("98.99"), outputPosition2.value());
+        assertNotNull(outputPosition2.datetime());
+    }
+
+    @Test
+    @Order(500)
+    void testFindAllByUserWithSameUserAndListEmpty() {
+        List<TransactionDTO> output = 
+            given()
+				.basePath("/api/v1/transaction")
+			        .header(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + TRANSFER_USER_ACCESS_TOKEN)
+					.port(TestConfigs.SERVER_PORT)
+					.contentType(TestConfigs.CONTENT_TYPE_JSON)
+                    .pathParam("user-id", TRANSFER_USER_ID)
+				.when()
+				    .get("/user/{user-id}")
+				.then()
+					.statusCode(HttpStatus.OK.value())
+						.extract()
+							.body()
+                                .jsonPath()
+                                    .getList(".", TransactionDTO.class);
+
+        assertEquals(0, output.size());
     }
 }
