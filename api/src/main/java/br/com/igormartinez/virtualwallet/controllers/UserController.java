@@ -30,8 +30,8 @@ public class UserController {
             @ApiResponse(description = "Internal Server Error", responseCode = "500", content = @Content)
         }
     )
-    @GetMapping("/{userId}")
-    public UserDTO findById(@PathVariable(name = "userId") Long id) {
+    @GetMapping("/{user-id}")
+    public UserDTO findById(@PathVariable(name = "user-id") Long id) {
         return service.findById(id);
     }
 }
