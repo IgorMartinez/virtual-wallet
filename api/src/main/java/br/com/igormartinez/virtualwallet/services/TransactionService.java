@@ -61,6 +61,7 @@ public class TransactionService {
 
         userRepository.save(user);
         Transaction persistedTransaction = repository.save(transaction);
+        
         return new TransactionDTO(
             persistedTransaction.getId(), 
             persistedTransaction.getType().name(), 
@@ -70,6 +71,9 @@ public class TransactionService {
 
     @Transactional
     public TransactionDTO createTranfer(TransferTransactionDTO transactionDTO) {
+        if (transactionDTO.payer().equals(transactionDTO.payee()))
+            throw new RequestValidationException("The transfer must be between two different users.");
+
         if (!securityContextManager.checkSameUser(transactionDTO.payer()))
             throw new UserUnauthorizedException();
             
@@ -94,6 +98,7 @@ public class TransactionService {
 
         userRepository.saveAll(List.of(payer, payee));
         Transaction persistedTransaction = repository.save(transaction);
+
         return new TransactionDTO(
             persistedTransaction.getId(), 
             persistedTransaction.getType().name(), 
