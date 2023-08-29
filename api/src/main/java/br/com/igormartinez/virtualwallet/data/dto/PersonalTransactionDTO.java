@@ -12,7 +12,7 @@ public record PersonalTransactionDTO(
     Long user,
 
     @NotNull(message = "The transaction value must be provided.")
-    @Digits(integer = 12, fraction = 2, message = "The value must have 12 integer digits and 2 decimal digits.")
+    @Digits(integer = 10, fraction = 2, message = "The value must have up to 10 integer digits and 2 decimal digits of precision.")
     @Positive(message = "The value of transaction must be greater than zero.")
     BigDecimal value
 ) {}
