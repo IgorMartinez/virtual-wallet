@@ -67,6 +67,139 @@ public class TransactionServiceTest {
     }
 
     @Test
+    void testFindByIdWithIdNull() {
+        Exception output = assertThrows(RequestValidationException.class, () -> {
+            service.findById(null);
+        });
+        String expectedMessage = "The transaction-id must be a positive integer value.";
+        assertTrue(output.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    void testFindByIdWithIdNegative() {
+        Exception output = assertThrows(RequestValidationException.class, () -> {
+            service.findById(-123L);
+        });
+        String expectedMessage = "The transaction-id must be a positive integer value.";
+        assertTrue(output.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    void testFindByIdWithIdZero() {
+        Exception output = assertThrows(RequestValidationException.class, () -> {
+            service.findById(0L);
+        });
+        String expectedMessage = "The transaction-id must be a positive integer value.";
+        assertTrue(output.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    void testFindByIdWithTransactionNotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.ofNullable(null));
+
+        Exception output = assertThrows(ResourceNotFoundException.class, () -> {
+            service.findById(1L);
+        });
+        String expectedMessage = "The transaction was not found with the given ID.";
+        assertTrue(output.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    void testFindByIdWithOtherUser() {
+        Transaction mockedTransaction = transactionMock.mockEntity(1);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(mockedTransaction));
+        when(securityContextManager.checkSameUser(mockedTransaction.getUser().getId())).thenReturn(Boolean.FALSE);
+
+        Exception output = assertThrows(UserUnauthorizedException.class, () -> {
+            service.findById(1L);
+        });
+        String expectedMessage = "The user is not authorized to access this resource.";
+        assertTrue(output.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    void testFindByIdWithSameUser() {
+        Transaction mockedTransaction = transactionMock.mockEntity(1);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(mockedTransaction));
+        when(securityContextManager.checkSameUser(mockedTransaction.getUser().getId())).thenReturn(Boolean.TRUE);
+
+        TransactionDTO output = service.findById(1L);
+        assertEquals(1L, output.id());
+        assertEquals(TransactionType.WITHDRAWAL.name(), output.type());
+        assertEquals(new BigDecimal("1.99"), output.value());
+        assertNotNull(output.datetime());
+    }
+
+    @Test
+    void testFindAllByUserWithIdNull() {
+        Exception output = assertThrows(RequestValidationException.class, () -> {
+            service.findAllByUser(null);
+        });
+        String expectedMessage = "The user-id must be a positive integer value.";
+        assertTrue(output.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    void testFindAllByUserWithIdNegative() {
+        Exception output = assertThrows(RequestValidationException.class, () -> {
+            service.findAllByUser(-123L);
+        });
+        String expectedMessage = "The user-id must be a positive integer value.";
+        assertTrue(output.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    void testFindAllByUserWithIdZero() {
+        Exception output = assertThrows(RequestValidationException.class, () -> {
+            service.findAllByUser(0L);
+        });
+        String expectedMessage = "The user-id must be a positive integer value.";
+        assertTrue(output.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    void testFindAllByUserWithOtherUser() {
+        when(securityContextManager.checkSameUser(1L)).thenReturn(Boolean.FALSE);
+
+        Exception output = assertThrows(UserUnauthorizedException.class, () -> {
+           service.findAllByUser(1L);
+        });
+        String expectedMessage = "The user is not authorized to access this resource.";
+        assertTrue(output.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    void testFindAllByUserWithSameUser() {
+        List<Transaction> mockedTransactions = transactionMock.mockEntityList(9);
+
+        when(securityContextManager.checkSameUser(1L)).thenReturn(Boolean.TRUE);
+        when(repository.findAllByUserId(1L)).thenReturn(mockedTransactions);
+
+        List<TransactionDTO> output = service.findAllByUser(1L);
+        assertEquals(9, output.size());
+
+        TransactionDTO outputPosition0 = output.get(0);
+        assertEquals(1L, outputPosition0.id());
+        assertEquals(TransactionType.WITHDRAWAL.name(), outputPosition0.type());
+        assertEquals(new BigDecimal("1.99"), outputPosition0.value());
+        assertNotNull(outputPosition0.datetime());
+
+        TransactionDTO outputPosition4 = output.get(4);
+        assertEquals(5L, outputPosition4.id());
+        assertEquals(TransactionType.TRANSFER.name(), outputPosition4.type());
+        assertEquals(new BigDecimal("5.99"), outputPosition4.value());
+        assertNotNull(outputPosition4.datetime());
+
+        TransactionDTO outputPosition8 = output.get(8);
+        assertEquals(9L, outputPosition8.id());
+        assertEquals(TransactionType.DEPOSIT.name(), outputPosition8.type());
+        assertEquals(new BigDecimal("9.99"), outputPosition8.value());
+        assertNotNull(outputPosition8.datetime());
+    }
+
+    @Test
     void testCreatePersonalTransactionWithOtherUser() {
         PersonalTransactionDTO transaction = new PersonalTransactionDTO(1L, new BigDecimal("0.01"));
 
