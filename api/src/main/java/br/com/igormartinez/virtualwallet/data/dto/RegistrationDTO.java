@@ -13,5 +13,8 @@ public record RegistrationDTO (
     String email,
     
     @NotBlank(message = "The password must be not blank.")
-    String password
+    String password,
+
+    @NotBlank(message = "The role must be not blank.")
+    String role
 ) {}

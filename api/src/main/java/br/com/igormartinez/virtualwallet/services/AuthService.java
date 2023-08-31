@@ -61,8 +61,8 @@ public class AuthService {
         user.setCredentialsNonExpired(Boolean.TRUE);
         user.setEnabled(Boolean.TRUE);
 
-        Role role = roleRepository.findById(1L)
-            .orElseThrow(() -> new ResourceNotFoundException("The role was not found with the given ID."));
+        Role role = roleRepository.findByDescription(registration.role())
+            .orElseThrow(() -> new ResourceNotFoundException("The role was not found with the given description."));
         user.setRole(role);
 
         User createdUser = repository.save(user);
