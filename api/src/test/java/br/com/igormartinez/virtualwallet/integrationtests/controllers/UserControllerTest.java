@@ -67,7 +67,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
     @Order(100)
     void signupAndAuthentication() {
         RegistrationDTO registrationDTO = 
-            new RegistrationDTO(USER_NAME, USER_DOCUMENT, USER_EMAIL, USER_PASSWORD);
+            new RegistrationDTO(USER_NAME, USER_DOCUMENT, USER_EMAIL, USER_PASSWORD, USER_ROLE);
 
         USER_ID = 
             given()

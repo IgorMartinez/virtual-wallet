@@ -9,4 +9,11 @@ public class RoleMock {
         role.setDescription("Description " + number);
         return role;
     }
+
+    public Role mockEntity(int number, String description) {
+        Role role = new Role();
+        role.setId(Long.valueOf(number));
+        role.setDescription(description);
+        return role;
+    }
 }

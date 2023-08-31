@@ -39,7 +39,7 @@ public class AuthControllerTest extends AbstractIntegrationTest {
     @Order(0)
     void testSignup() {
         RegistrationDTO registrationDTO = 
-            new RegistrationDTO(USER_NAME, USER_DOCUMENT, USER_EMAIL, USER_PASSWORD);
+            new RegistrationDTO(USER_NAME, USER_DOCUMENT, USER_EMAIL, USER_PASSWORD, USER_ROLE);
 
         UserDTO output = 
             given()
@@ -91,7 +91,7 @@ public class AuthControllerTest extends AbstractIntegrationTest {
     @Order(0)
     void testSignupWithFieldsBlankOrNull() {
         RegistrationDTO registrationDTO = 
-            new RegistrationDTO(" ", USER_DOCUMENT, null, USER_PASSWORD);
+            new RegistrationDTO(" ", USER_DOCUMENT, null, USER_PASSWORD, USER_ROLE);
         
         ApiErrorResponse output = 
             given()
@@ -118,10 +118,38 @@ public class AuthControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Order(0)
+    void testSignupWithRoleNotFound() {
+        RegistrationDTO registrationDTO = 
+            new RegistrationDTO(USER_NAME, USER_DOCUMENT+"asdfera", USER_EMAIL+"asdfera", USER_PASSWORD, "asdfera");
+        
+        ApiErrorResponse output = 
+            given()
+                .basePath("/auth/signup")
+                    .port(TestConfigs.SERVER_PORT)
+                    .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                    .body(registrationDTO)
+                .when()
+                    .post()
+                .then()
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                        .extract()
+                            .body()
+                                .as(ApiErrorResponse.class);
+        
+        assertEquals("about:blank", output.type());
+        assertEquals("Not Found", output.title());
+        assertEquals(HttpStatus.NOT_FOUND.value(), output.status());
+        assertEquals("The role was not found with the given description.", output.detail());
+        assertEquals("/auth/signup", output.instance());
+        assertNull(output.errors());
+    }
+
+    @Test
     @Order(10)
     void testSignupWithDuplicatedEmail() {
         RegistrationDTO registrationDTO = 
-            new RegistrationDTO(USER_NAME, USER_DOCUMENT, USER_EMAIL, USER_PASSWORD);
+            new RegistrationDTO(USER_NAME, USER_DOCUMENT, USER_EMAIL, USER_PASSWORD, USER_ROLE);
         
         ApiErrorResponse output = 
             given()

@@ -90,7 +90,7 @@ public class AuthServiceTest {
     @Test
     void testSignupWithExistingUser() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", "000.000.000-00", "email@email.com", "1234");
+            "Name 1", "000.000.000-00", "email@email.com", "1234", "COMMON");
 
         when(userRepository.findByEmailOrDocument(registrationDTO.email(), registrationDTO.document()))
             .thenReturn(Optional.of(userMock.mockEntity(1)));
@@ -105,15 +105,15 @@ public class AuthServiceTest {
     @Test
     void testSignUpWithNotExistingUser(){
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", "000.000.000-00", "email@email.com", "1234");
-        Role mockedRole = roleMock.mockEntity(1);
+            "Name 1", "000.000.000-00", "email@email.com", "1234", "COMMON");
+        Role mockedRole = roleMock.mockEntity(1, "COMMON");
         User mockedUser = userMock.mockEntity(1, registrationDTO, mockedRole);
 
         when(userRepository.findByEmailOrDocument(registrationDTO.email(), registrationDTO.document()))
             .thenReturn(Optional.ofNullable(null));
         when(passwordManager.encodePassword(registrationDTO.password()))
             .thenReturn("encodedPassword");
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(mockedRole));
+        when(roleRepository.findByDescription(registrationDTO.role())).thenReturn(Optional.of(mockedRole));
         when(userRepository.save(any(User.class))).thenReturn(mockedUser);
 
         UserDTO output = service.signup(registrationDTO);
@@ -122,7 +122,7 @@ public class AuthServiceTest {
         assertEquals("000.000.000-00", output.document());
         assertEquals("email@email.com", output.email());
         assertEquals(new BigDecimal("1.99"), output.accountBalance());
-        assertEquals("Description 1", output.role());
+        assertEquals("COMMON", output.role());
 
         // Verify the argument just before send to save in database
         ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
@@ -139,24 +139,24 @@ public class AuthServiceTest {
         assertTrue(capturedObject.getCredentialsNonExpired());
         assertTrue(capturedObject.getEnabled());
         assertEquals(1L, capturedObject.getRole().getId());
-        assertEquals("Description 1", capturedObject.getRole().getDescription());
+        assertEquals("COMMON", capturedObject.getRole().getDescription());
     }
 
     @Test
     void testSignupWithRoleNotFound() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", "000.000.000-00", "email@email.com", "1234");
+            "Name 1", "000.000.000-00", "email@email.com", "1234", "ASD");
 
         when(userRepository.findByEmailOrDocument(registrationDTO.email(), registrationDTO.document()))
             .thenReturn(Optional.ofNullable(null));
         when(passwordManager.encodePassword(registrationDTO.password()))
             .thenReturn("encodedPassword");
-        when(roleRepository.findById(1L)).thenReturn(Optional.ofNullable(null));
+        when(roleRepository.findByDescription(registrationDTO.role())).thenReturn(Optional.ofNullable(null));
 
         Exception output = assertThrows(ResourceNotFoundException.class, () -> {
             service.signup(registrationDTO);
         });
-        String expectedMessage = "The role was not found with the given ID.";
+        String expectedMessage = "The role was not found with the given description.";
         assertTrue(output.getMessage().contains(expectedMessage));
     }
 

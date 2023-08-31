@@ -47,6 +47,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     private static String USER_DOCUMENT = "202.308.290-14";
     private static String USER_EMAIL = "transactioncontroller@integration.test";
 	private static String USER_PASSWORD = "securedpassword";
+    private static String USER_ROLE = "COMMON";
 
     private static Long TRANSFER_USER_ID; // signupTransferUser()
     private static String TRANSFER_USER_NAME = "Transaction Controller Test 2";
@@ -54,6 +55,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     private static String TRANSFER_USER_EMAIL = "transactioncontroller2@integration.test";
 	private static String TRANSFER_USER_PASSWORD = "securedpassword";
     private static String TRANSFER_USER_ACCESS_TOKEN; // signupTransferUserAndGetAccessToken()
+    private static String TRANSFER_USER_ROLE = "COMMON";
     
     @Test
     @Order(0)
@@ -181,7 +183,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     @Order(99)
     void signupAndAuthentication() {
         RegistrationDTO registrationDTO = 
-            new RegistrationDTO(USER_NAME, USER_DOCUMENT, USER_EMAIL, USER_PASSWORD);
+            new RegistrationDTO(USER_NAME, USER_DOCUMENT, USER_EMAIL, USER_PASSWORD, USER_ROLE);
 
         USER_ID = 
             given()
@@ -228,7 +230,7 @@ public class TransactionControllerTest extends AbstractIntegrationTest {
     void signupTransferUserAndGetAccessToken() {
         RegistrationDTO registrationDTO = 
             new RegistrationDTO(TRANSFER_USER_NAME, TRANSFER_USER_DOCUMENT, 
-                TRANSFER_USER_EMAIL, TRANSFER_USER_PASSWORD);
+                TRANSFER_USER_EMAIL, TRANSFER_USER_PASSWORD, TRANSFER_USER_ROLE);
 
         TRANSFER_USER_ID = 
             given()

@@ -27,7 +27,7 @@ public class RegistrationDTOValidatorTest {
     @Test
     void testSuccess() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", "000.000.000-00", "email@email.com", "1234");
+            "Name 1", "000.000.000-00", "email@email.com", "1234", "COMMON");
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertTrue(violations.isEmpty());
@@ -36,7 +36,7 @@ public class RegistrationDTOValidatorTest {
     @Test
     void testWithNameNull() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            null, "000.000.000-00", "email@email.com", "1234");
+            null, "000.000.000-00", "email@email.com", "1234", "COMMON");
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
@@ -46,7 +46,7 @@ public class RegistrationDTOValidatorTest {
     @Test
     void testWithNameBlank() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "   ", "000.000.000-00", "email@email.com", "1234");
+            "   ", "000.000.000-00", "email@email.com", "1234", "COMMON");
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
@@ -56,7 +56,7 @@ public class RegistrationDTOValidatorTest {
     @Test
     void testWithDocumentNull() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", null, "email@email.com", "1234");
+            "Name 1", null, "email@email.com", "1234", "COMMON");
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
@@ -66,7 +66,7 @@ public class RegistrationDTOValidatorTest {
     @Test
     void testWithDocumentBlank() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", "   ", "email@email.com", "1234");
+            "Name 1", "   ", "email@email.com", "1234", "COMMON");
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
@@ -76,7 +76,7 @@ public class RegistrationDTOValidatorTest {
     @Test
     void testWithEmailNull() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", "000.000.000-00", null, "1234");
+            "Name 1", "000.000.000-00", null, "1234", "COMMON");
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
@@ -86,7 +86,7 @@ public class RegistrationDTOValidatorTest {
     @Test
     void testWithEmailBlank() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", "000.000.000-00", "  ", "1234");
+            "Name 1", "000.000.000-00", "  ", "1234", "COMMON");
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
@@ -96,7 +96,7 @@ public class RegistrationDTOValidatorTest {
     @Test
     void testWithPasswordNull() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", "000.000.000-00", "email@email.com", null);
+            "Name 1", "000.000.000-00", "email@email.com", null, "COMMON");
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
@@ -106,10 +106,30 @@ public class RegistrationDTOValidatorTest {
     @Test
     void testWithPasswordBlank() {
         RegistrationDTO registrationDTO = new RegistrationDTO(
-            "Name 1", "000.000.000-00", "email@email.com", "  ");
+            "Name 1", "000.000.000-00", "email@email.com", "  ", "COMMON");
         
         Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
         assertEquals(1, violations.size());
         assertEquals("The password must be not blank.", violations.iterator().next().getMessage());
+    }
+
+    @Test
+    void testWithRoleNull() {
+        RegistrationDTO registrationDTO = new RegistrationDTO(
+            "Name 1", "000.000.000-00", "email@email.com", "1234", null);
+        
+        Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
+        assertEquals(1, violations.size());
+        assertEquals("The role must be not blank.", violations.iterator().next().getMessage());
+    }
+
+    @Test
+    void testWithRoleBlank() {
+        RegistrationDTO registrationDTO = new RegistrationDTO(
+            "Name 1", "000.000.000-00", "email@email.com", "1234", " ");
+        
+        Set<ConstraintViolation<RegistrationDTO>> violations = validator.validate(registrationDTO);
+        assertEquals(1, violations.size());
+        assertEquals("The role must be not blank.", violations.iterator().next().getMessage());
     }
 }
