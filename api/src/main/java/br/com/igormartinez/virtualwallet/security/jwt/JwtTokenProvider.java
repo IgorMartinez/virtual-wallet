@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -132,9 +133,13 @@ public class JwtTokenProvider {
 
     public Authentication getAuthentication(String token) {
         DecodedJWT decodedJWT = decodedToken(token);
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(decodedJWT.getSubject());
 
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities()); 
+        try {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(decodedJWT.getSubject());
+            return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities()); 
+        } catch (UsernameNotFoundException ex) {
+            return null;
+        }
     }
 
     private DecodedJWT decodedToken(String token) {
