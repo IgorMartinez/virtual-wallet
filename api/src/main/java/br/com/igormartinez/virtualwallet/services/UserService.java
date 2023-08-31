@@ -26,7 +26,6 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // TODO: User not found in authentication throw status 500
         return repository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found."));
     }
